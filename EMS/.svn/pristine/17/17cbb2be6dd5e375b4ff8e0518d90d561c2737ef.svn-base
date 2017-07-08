@@ -1,0 +1,127 @@
+package com.ems.servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.ems.utils.DbHelper;
+import com.ems.utils.PageHelper;
+
+public class XxwhServlet extends HttpServlet {
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		PageHelper page=(PageHelper)request.getSession().getAttribute("pageinfo");
+		String method=request.getParameter("method");
+		System.out.println(method);
+		if("teacheradd".equals(method)){
+			String userid=request.getParameter("userid");
+			String name=request.getParameter("name");
+			String password=request.getParameter("password");
+			String sex=request.getParameter("sex");
+			String type=request.getParameter("type");
+			String sql="insert into teacher values(null,'"+userid+"','"+name+"','"+password+"','"+sex+"','"+type+"')";
+			request.setAttribute("msg", (DbHelper.update(sql)?"操作成功！":"操作失败！"));
+			request.getRequestDispatcher("Xxwh.do?method=teachersel").forward(request, response);
+		}else if("teacherupd".equals(method)){
+			String id=request.getParameter("id");
+			String userid=request.getParameter("userid");
+			String name=request.getParameter("name");
+			String password=request.getParameter("password");
+			String sex=request.getParameter("sex");
+			String type=request.getParameter("type");
+			String sql="update teacher set userid='"+userid+"',name='"+name+"',password='"+password+"',sex='"+sex+"',type='"+type+"' where id="+id;
+			request.setAttribute("msg", (DbHelper.update(sql)?"操作成功！":"操作失败！"));
+			request.getRequestDispatcher("Xxwh.do?method=teachersel").forward(request, response);
+		}else if("teacherdel".equals(method)){
+			String id=request.getParameter("id");
+			String sql="delete from teacher where id="+id;
+			request.setAttribute("msg", (DbHelper.update(sql)?"操作成功！":"操作失败！"));
+			request.getRequestDispatcher("Xxwh.do?method=teachersel").forward(request, response);
+		}else if("teachersel".equals(method)){
+			String cuserid=request.getParameter("cuserid");
+			String cname=request.getParameter("cname");
+			String sql="select * from teacher where 1=1 ";
+			String condition="";
+			if(null!=cuserid&&!"".equals(cuserid)){
+				condition+=" and userid = '"+cuserid+"'";
+			}
+			if(null!=cname&&!"".equals(cname)){
+				condition+=" and name like '%"+cname+"%'";
+			}
+			sql+=condition+" order by userid ";
+			page=PageHelper.getpage(sql, 5, condition,"jsp/background/xxwh/teacherInfo.jsp");
+			request.getSession().setAttribute("pageinfo", page);
+			List list=DbHelper.queryForTable(sql+" limit "+((page.getNowPage()-1)*page.getRecordNum())+","+page.getRecordNum());
+			request.setAttribute("tlist", list);
+			request.getRequestDispatcher("jsp/background/xxwh/teacherInfo.jsp").forward(request, response);
+		}else if("studentadd".equals(method)){
+			String userid=request.getParameter("userid");
+			String name=request.getParameter("name");
+			String password=request.getParameter("password");
+			String sex=request.getParameter("sex");
+			String type=request.getParameter("type");
+			String sql="insert into teacher values(null,'"+userid+"','"+name+"','"+password+"','"+sex+"','"+type+"')";
+			request.setAttribute("msg", (DbHelper.update(sql)?"操作成功！":"操作失败！"));
+			request.getRequestDispatcher("Xxwh.do?method=teachersel").forward(request, response);
+		}else if("studentupd".equals(method)){
+			String id=request.getParameter("id");
+			String userid=request.getParameter("userid");
+			String name=request.getParameter("name");
+			String password=request.getParameter("password");
+			String sex=request.getParameter("sex");
+			String type=request.getParameter("type");
+			String sql="update teacher set userid='"+userid+"',name='"+name+"',password='"+password+"',sex='"+sex+"',type='"+type+"' where id="+id;
+			request.setAttribute("msg", (DbHelper.update(sql)?"操作成功！":"操作失败！"));
+			request.getRequestDispatcher("Xxwh.do?method=teachersel").forward(request, response);
+		}else if("studentdel".equals(method)){
+			String id=request.getParameter("id");
+			String sql="delete from teacher where id="+id;
+			request.setAttribute("msg", (DbHelper.update(sql)?"操作成功！":"操作失败！"));
+			request.getRequestDispatcher("Xxwh.do?method=teachersel").forward(request, response);
+		}else if("studentsel".equals(method)){
+			String cuserid=request.getParameter("cuserid");
+			String cname=request.getParameter("cname");
+			String sql="select * from teacher where 1=1 ";
+			String condition="";
+			if(null!=cuserid&&!"".equals(cuserid)){
+				condition+=" and userid = '"+cuserid+"'";
+			}
+			if(null!=cname&&!"".equals(cname)){
+				condition+=" and name like '%"+cname+"%'";
+			}
+			sql+=condition+" order by userid ";
+			page=PageHelper.getpage(sql, 5, condition,"jsp/background/xxwh/teacherInfo.jsp");
+			request.getSession().setAttribute("pageinfo", page);
+			List list=DbHelper.queryForTable(sql+" limit "+((page.getNowPage()-1)*page.getRecordNum())+","+page.getRecordNum());
+			request.setAttribute("tlist", list);
+			request.getRequestDispatcher("jsp/background/xxwh/teacherInfo.jsp").forward(request, response);
+		}else if("chgpage".equals(method)){
+			String topage=request.getParameter("topage");
+			if("-1".equals(topage)){
+				String per=request.getParameter("per");
+				page=PageHelper.getpage(page.getSql(), Integer.parseInt(per), page.getCondition(),page.getUrl());
+			}else{
+				page.setNowPage(Integer.parseInt(topage));
+			}
+			request.getSession().setAttribute("pageinfo", page);
+			List list=DbHelper.queryForTable(page.getSql()+" limit "+((page.getNowPage()-1)*page.getRecordNum())+","+page.getRecordNum());
+			request.setAttribute("tlist", list);
+			request.getRequestDispatcher(page.getUrl()).forward(request, response);
+		}
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
+	}
+
+}
